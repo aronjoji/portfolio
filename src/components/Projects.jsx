@@ -1,8 +1,10 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Github, ExternalLink, MessageSquare, Music, Bot, School } from 'lucide-react';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Github, ExternalLink, MessageSquare, Music, Bot, School, X, AlertTriangle } from 'lucide-react';
 
 const Projects = () => {
+    const [selectedProject, setSelectedProject] = useState(null);
+
     const projects = [
         {
             title: "Spotify Clone",
@@ -11,8 +13,9 @@ const Projects = () => {
             image: "/projects/spotify.png",
             tech: ["React", "Node.js", "MongoDB", "Express", "Socket.io"],
             github: "https://github.com/aronjoji",
-            live: "https://aronjoji.online/",
-            icon: <Music className="w-5 h-5" />
+            live: "https://audix-musix.onrender.com/",
+            icon: <Music className="w-5 h-5" />,
+            requiresWarning: true
         },
         {
             title: "WhatsApp Automation Bot",
@@ -35,6 +38,13 @@ const Projects = () => {
             icon: <School className="w-5 h-5" />
         }
     ];
+
+    const handleLiveClick = (e, project) => {
+        if (project.requiresWarning) {
+            e.preventDefault();
+            setSelectedProject(project);
+        }
+    };
 
     return (
         <section id="projects" className="py-24">
@@ -87,6 +97,7 @@ const Projects = () => {
                                 <a
                                     href={project.github}
                                     target="_blank"
+                                    rel="noopener noreferrer"
                                     className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"
                                 >
                                     <Github className="w-4 h-4" /> Code
@@ -94,6 +105,8 @@ const Projects = () => {
                                 <a
                                     href={project.live}
                                     target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={(e) => handleLiveClick(e, project)}
                                     className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors ml-auto"
                                 >
                                     <ExternalLink className="w-4 h-4" /> Demo
@@ -103,6 +116,64 @@ const Projects = () => {
                     </motion.div>
                 ))}
             </div>
+
+            <AnimatePresence>
+                {selectedProject && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setSelectedProject(null)}
+                            className="absolute inset-0 bg-background/80 backdrop-blur-sm"
+                        />
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                            className="relative glass-card max-w-md w-full p-8 border border-primary/20 shadow-[0_0_50px_rgba(0,210,255,0.1)]"
+                        >
+                            <button
+                                onClick={() => setSelectedProject(null)}
+                                className="absolute top-4 right-4 text-gray-400 hover:text-white"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+
+                            <div className="flex items-center gap-4 mb-6">
+                                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                                    <AlertTriangle className="w-6 h-6" />
+                                </div>
+                                <h3 className="text-xl font-bold">Important Note</h3>
+                            </div>
+
+                            <p className="text-gray-400 mb-8 leading-relaxed">
+                                This project is hosted on a <span className="text-white font-semibold">free tier</span>.
+                                It may take up to <span className="text-primary font-bold">90 seconds</span> to spin up
+                                for the first time. Thanks for your patience!
+                            </p>
+
+                            <div className="flex flex-col gap-3">
+                                <a
+                                    href={selectedProject.live}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={() => setSelectedProject(null)}
+                                    className="neon-button text-center flex items-center justify-center gap-2"
+                                >
+                                    Proceed to Website <ExternalLink className="w-4 h-4" />
+                                </a>
+                                <button
+                                    onClick={() => setSelectedProject(null)}
+                                    className="text-gray-400 hover:text-white text-sm transition-colors py-2"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </section>
     );
 };
