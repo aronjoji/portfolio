@@ -1,8 +1,18 @@
-import React from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Github, Activity, GitCommit, Star, GitBranch } from 'lucide-react';
 
 const GitHubActivity = () => {
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        const mq = window.matchMedia('(max-width: 768px)');
+        setIsMobile(mq.matches);
+        const handler = (e) => setIsMobile(e.matches);
+        mq.addEventListener('change', handler);
+        return () => mq.removeEventListener('change', handler);
+    }, []);
+
     // Mock data for futuristic visualization
     const stats = [
         { label: "Repositories", value: "45+", icon: <Star className="w-4 h-4 text-yellow-500" /> },
@@ -10,6 +20,19 @@ const GitHubActivity = () => {
         { label: "Prj. Completed", value: "30+", icon: <GitBranch className="w-4 h-4 text-green-500" /> },
         { label: "Contributed To", value: "12+", icon: <Activity className="w-4 h-4 text-secondary" /> },
     ];
+
+    const cellCount = isMobile ? 168 : 350;
+
+    // Memoize grid colors so Math.random() is called only once
+    const gridCells = useMemo(() => {
+        return [...Array(cellCount)].map((_, i) => {
+            const r = Math.random();
+            const bg = r > 0.8 ? 'rgba(0, 210, 255, 0.8)' :
+                r > 0.6 ? 'rgba(0, 210, 255, 0.4)' :
+                    r > 0.4 ? 'rgba(0, 210, 255, 0.1)' : 'rgba(255, 255, 255, 0.05)';
+            return { id: i, bg };
+        });
+    }, [cellCount]);
 
     return (
         <section id="github" className="py-24">
@@ -37,22 +60,18 @@ const GitHubActivity = () => {
                         ))}
                     </div>
 
-                    {/* Activity Widget Mockup */}
+                    {/* Activity Widget — memoized, fewer cells on mobile */}
                     <div className="glass-card p-6 bg-white/5 border-white/5 flex flex-col items-center">
                         <div className="flex justify-between w-full text-xs text-gray-500 mb-4 px-2">
                             <span>Contribution Activity</span>
                             <span className="text-primary hover:underline cursor-pointer">@aronjoji</span>
                         </div>
                         <div className="flex flex-wrap gap-[2px] justify-center">
-                            {[...Array(350)].map((_, i) => (
+                            {gridCells.map((cell) => (
                                 <div
-                                    key={i}
-                                    className={`w-3 h-3 rounded-[1px] transition-colors duration-500 hover:bg-white`}
-                                    style={{
-                                        backgroundColor: Math.random() > 0.8 ? 'rgba(0, 210, 255, 0.8)' :
-                                            Math.random() > 0.6 ? 'rgba(0, 210, 255, 0.4)' :
-                                                Math.random() > 0.4 ? 'rgba(0, 210, 255, 0.1)' : 'rgba(255, 255, 255, 0.05)'
-                                    }}
+                                    key={cell.id}
+                                    className="w-3 h-3 rounded-[1px]"
+                                    style={{ backgroundColor: cell.bg }}
                                 ></div>
                             ))}
                         </div>

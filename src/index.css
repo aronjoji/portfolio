@@ -73,6 +73,17 @@
   }
 }
 
+/* Mobile performance: reduce expensive effects */
+@media (max-width: 768px) {
+  .glass-card {
+    backdrop-filter: blur(12px);
+  }
+
+  .neon-text {
+    filter: none;
+  }
+}
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
