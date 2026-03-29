@@ -25,6 +25,7 @@ const Hero = () => {
                     initial={{ opacity: 0, x: -50 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.8 }}
+                    className="text-center lg:text-left"
                 >
                     <motion.span
                         initial={{ opacity: 0 }}
@@ -48,7 +49,7 @@ const Hero = () => {
                                 animate={{ y: 0, opacity: 1 }}
                                 exit={{ y: -20, opacity: 0 }}
                                 transition={{ duration: 0.5 }}
-                                className="absolute inset-0 flex items-center"
+                                className="absolute inset-0 flex items-center justify-center lg:justify-start"
                             >
                                 <span className="text-2xl md:text-3xl text-gray-400 font-medium">
                                     {titles[index]}
@@ -57,11 +58,11 @@ const Hero = () => {
                         </AnimatePresence>
                     </div>
 
-                    <p className="text-gray-400 text-lg max-w-lg mb-10 leading-relaxed">
+                    <p className="text-gray-400 text-lg max-w-lg mb-10 leading-relaxed mx-auto lg:mx-0">
                         Crafting premium web experiences and scalable automation systems with a focus on modern aesthetic and efficient functionality.
                     </p>
 
-                    <div className="flex flex-wrap gap-4">
+                    <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
                         <a href="#projects" className="neon-button flex items-center gap-2">
                             View Projects <ArrowRight className="w-4 h-4" />
                         </a>
