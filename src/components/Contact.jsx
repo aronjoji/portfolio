@@ -1,8 +1,51 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Send, Mail, Github, Globe, MapPin } from 'lucide-react';
+import { Send, Mail, Github, Globe, MapPin, CheckCircle, Loader2 } from 'lucide-react';
+
+const GOOGLE_FORM_ACTION =
+    'https://docs.google.com/forms/u/0/d/e/1FAIpQLSfbeZ73okM_WypjWycoXoiy98uzk2L9xQhXKTEQm43gggrZpQ/formResponse';
+
+const ENTRY_IDS = {
+    name: 'entry.690104609',
+    email: 'entry.1685492856',
+    message: 'entry.1489936622',
+};
 
 const Contact = () => {
+    const [formData, setFormData] = useState({ name: '', email: '', message: '' });
+    const [status, setStatus] = useState('idle'); // idle | sending | success | error
+
+    const handleChange = (e) => {
+        setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setStatus('sending');
+
+        const body = new URLSearchParams();
+        body.append(ENTRY_IDS.name, formData.name);
+        body.append(ENTRY_IDS.email, formData.email);
+        body.append(ENTRY_IDS.message, formData.message);
+
+        try {
+            await fetch(GOOGLE_FORM_ACTION, {
+                method: 'POST',
+                mode: 'no-cors', // Google Forms doesn't support CORS
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: body.toString(),
+            });
+            // With no-cors we can't read the response, but if the fetch didn't throw, it was sent
+            setStatus('success');
+            setFormData({ name: '', email: '', message: '' });
+        } catch {
+            setStatus('error');
+        }
+
+        // Reset status after 5 seconds
+        setTimeout(() => setStatus('idle'), 5000);
+    };
+
     return (
         <section id="contact" className="py-24">
             <div className="glass-card p-8 md:p-12 relative overflow-hidden">
@@ -48,13 +91,17 @@ const Contact = () => {
                         </div>
                     </div>
 
-                    <form className="space-y-4">
+                    <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-gray-400">Name</label>
                                 <input
                                     type="text"
+                                    name="name"
+                                    value={formData.name}
+                                    onChange={handleChange}
                                     placeholder="Your Name"
+                                    required
                                     className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-primary/50 focus:outline-none transition-all"
                                 />
                             </div>
@@ -62,7 +109,11 @@ const Contact = () => {
                                 <label className="text-sm font-medium text-gray-400">Email</label>
                                 <input
                                     type="email"
+                                    name="email"
+                                    value={formData.email}
+                                    onChange={handleChange}
                                     placeholder="your@email.com"
+                                    required
                                     className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-primary/50 focus:outline-none transition-all"
                                 />
                             </div>
@@ -71,13 +122,39 @@ const Contact = () => {
                             <label className="text-sm font-medium text-gray-400">Message</label>
                             <textarea
                                 rows="4"
+                                name="message"
+                                value={formData.message}
+                                onChange={handleChange}
                                 placeholder="Tell me about your project..."
+                                required
                                 className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-primary/50 focus:outline-none transition-all resize-none"
                             ></textarea>
                         </div>
-                        <button className="neon-button w-full flex items-center justify-center gap-2 group">
-                            Send Message <Send className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+
+                        <button
+                            type="submit"
+                            disabled={status === 'sending'}
+                            className="neon-button w-full flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {status === 'sending' ? (
+                                <>Sending... <Loader2 className="w-4 h-4 animate-spin" /></>
+                            ) : status === 'success' ? (
+                                <>Message Sent! <CheckCircle className="w-4 h-4" /></>
+                            ) : (
+                                <>Send Message <Send className="w-4 h-4 group-hover:translate-x-1 transition-transform" /></>
+                            )}
                         </button>
+
+                        {status === 'success' && (
+                            <p className="text-center text-sm text-green-400 mt-2">
+                                Thank you! Your message has been sent successfully.
+                            </p>
+                        )}
+                        {status === 'error' && (
+                            <p className="text-center text-sm text-red-400 mt-2">
+                                Something went wrong. Please try again later.
+                            </p>
+                        )}
                     </form>
                 </div>
             </div>
